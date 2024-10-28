@@ -264,7 +264,7 @@ async function translateText(text, apiKey, modelName) {
                 messages: [
                     {
                         "role": "system",
-                        "content": `Translate the following text to ${targetLanguage}. Keep it natural and fluent.`
+                        "content": `Translate the following text into ${targetLanguage} while ensuring it remains natural and fluent. Please avoid using any non-standard characters or formats.`
                     },
                     {
                         "role": "user",

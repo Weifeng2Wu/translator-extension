@@ -13,19 +13,26 @@
     "<all_urls>"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/js/background.js"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["utils.js", "translator.js"]
+      "js": [
+        "src/js/utils.js",
+        "src/js/translator.js"
+      ]
     }
   ],
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "public/popup.html"
   },
   "options_ui": {
-    "page": "options.html",
+    "page": "public/options.html",
     "open_in_tab": true
-  }
+  },
+  "web_accessible_resources": [{
+    "resources": ["src/css/*.css"],
+    "matches": ["<all_urls>"]
+  }]
 }
