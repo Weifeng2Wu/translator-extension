@@ -289,14 +289,70 @@ async function translateFullPage(apiKey, modelName) {
     if (document.body.getAttribute('data-translated')) return;
     document.body.setAttribute('data-translated', 'true');
     
-    // Get the main content elements
-    const elements = Array.from(document.querySelectorAll('p, article p, .content p, main p, .post-content p, .article-content p'))
+    // selector for main content
+    const selector = `
+        p, h1, h2, h3, h4, h5, h6,
+        article p, .content p, main p, 
+        .post-content p, .article-content p,
+        div[class*="text"], div[class*="content"],
+        span[class*="text"], span[class*="content"],
+        .description, .summary, .abstract,
+        article div, main div,
+        li, ul li, ol li,
+        .list-item, [class*="list-item"],
+        [class*="description"], [class*="content-list"]
+    `;
+
+    // improve element filtering logic
+    const elements = Array.from(document.querySelectorAll(selector))
         .filter(element => {
-            if (element.closest('.translation-card, .inline-translation, script, style, header, nav, code, pre')) {
+            // extend exclude selectors
+            const excludeSelectors = [
+                '.translation-card',
+                '.inline-translation',
+                'script',
+                'style',
+                'header',
+                'nav',
+                'code',
+                'pre',
+                'button',
+                '.menu',
+                '.navigation',
+                '.footer',
+                '[class*="menu"]',
+                '[class*="nav"]',
+                '[class*="footer"]',
+                'form',
+                'input',
+                'textarea',
+                '.breadcrumb',  // breadcrumb
+                '[class*="breadcrumb"]',
+                'nav ul',       // nav list
+                'header ul',    // header list
+                'footer ul'     // footer list
+            ];
+
+            // check if the element is in the exclude selectors
+            if (excludeSelectors.some(selector => element.closest(selector))) {
                 return false;
             }
+
+            // get and clean text content
             const text = element.textContent.trim();
-            return text.length > 10;
+            
+            // improve text content validation
+            const isValidText = text.length > 10 && 
+                              !/^\d+$/.test(text) &&  // exclude pure numbers
+                              !/^[^a-zA-Z\u4e00-\u9fa5]+$/.test(text); // make sure it contains text
+            
+            // check if the element is not translated
+            const isNotTranslated = !element.nextElementSibling?.classList.contains('inline-translation');
+            
+            // check if the element is visible
+            const isVisible = element.offsetParent !== null;
+            
+            return isValidText && isNotTranslated && isVisible;
         });
 
     // Create progress bar
@@ -378,4 +434,3 @@ async function translateFullPage(apiKey, modelName) {
     // Start translation
     translateBatch();
 }
-
